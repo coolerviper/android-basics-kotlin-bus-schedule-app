@@ -15,30 +15,50 @@
  */
 package com.example.busschedule
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import androidx.navigation.NavController
-import androidx.navigation.fragment.NavHostFragment
-import androidx.navigation.ui.setupActionBarWithNavController
-import com.example.busschedule.databinding.ActivityMainBinding
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.runtime.Composable
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import com.example.busschedule.ui.fullschedule.FullScheduleScreen
+import com.example.busschedule.ui.stopschedule.StopScheduleScreen
+import com.example.mealz.ui.theme.MealzTheme
+import dagger.hilt.android.AndroidEntryPoint
 
-class MainActivity : AppCompatActivity() {
-
-    private lateinit var navController: NavController
-
+@AndroidEntryPoint
+class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        val binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-
-        val navHostFragment = supportFragmentManager
-            .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
-        navController = navHostFragment.navController
-        setupActionBarWithNavController(navController)
+        setContent {
+            MealzTheme {
+                BusScheduleApp()
+            }
+        }
     }
 
-    override fun onSupportNavigateUp(): Boolean {
-        return navController.navigateUp() || super.onSupportNavigateUp()
+}
+
+@Composable
+private fun BusScheduleApp(){
+    val navController = rememberNavController()
+    NavHost(navController = navController, startDestination = "full_schedule") {
+        composable(route = "full_schedule") {
+            FullScheduleScreen { stopName ->
+                navController.navigate("stop_schedule/${stopName}")
+            }
+        }
+
+        composable(
+            route = "stop_schedule/{stop_name}",
+            arguments = listOf(navArgument("stop_name") {
+                type = NavType.StringType
+            })
+        ) {
+           StopScheduleScreen()
+        }
     }
 }
